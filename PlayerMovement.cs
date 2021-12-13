@@ -2,31 +2,40 @@
 
 public class PlayerMovement : MonoBehaviour
 {
-    public Vector2 speed = new Vector2(10, 10);
+    public float speed = 2000;
     
-    public bool grounded;
-    public bool readyToJump = true;
+    bool grounded;
+    bool readyToJump = true;
     public LayerMask whatIsGround;
-    public float jumpForce = 1000f;
-    public float jumpCooldown = 0.5f;
+    public float jumpForce = 75000f;
+    public float jumpCooldown = 0.3f;
     public float maximumSpeed = 10f;
     public float turnAroundCut = 5f;
-    public float turnFactor = 2f;
+    public float turnFactor = 2000f;
     public Rigidbody2D rb;
 
-    public Vector3 velocity;
-    public float magnitude;
+    public bool facingRight;
+    public GameObject gun;
+
+    Vector3 velocity;
+    float magnitude;
 
     void FixedUpdate()
 	{
-        #region movement
+        movement();
+    }
+
+    #region movement
+    void movement() {
+
+        #region Add forces
 
         bool jumping = Input.GetButton("Jump");
         float inputX = Input.GetAxis("Horizontal");
 
-        Vector2 movement = new Vector2(speed.x * inputX, 0);
+        Vector2 movement = new Vector2(speed * inputX, 0);
 
-        /*velocity = rb.velocity;
+        velocity = rb.velocity;
         magnitude = Vector3.Magnitude(rb.velocity);
 
         if (grounded && readyToJump && jumping)
@@ -34,12 +43,11 @@ public class PlayerMovement : MonoBehaviour
             grounded = false;
             readyToJump = false;
             Invoke(nameof(ResetJump), jumpCooldown);
-            //rb.AddForce(Vector2.up * jumpForce);
             movement.y = jumpForce;
-        }*/
+        }
 
         #region limit velocity
-        /*if (magnitude > maximumSpeed)
+        if (magnitude > maximumSpeed)
 
         {
             float brakeSpeed = magnitude - maximumSpeed;
@@ -48,27 +56,38 @@ public class PlayerMovement : MonoBehaviour
             float brakeVelocity = normalisedVelocity.x * brakeSpeed;
 
             movement.x = brakeVelocity;
-        }*/
+        }
         #endregion
 
         #region turn around faster
-        /*if (turnAroundCut < velocity.x && inputX < 0)
+        if (turnAroundCut < velocity.x && inputX < 0)
         {
-            Debug.Log("Left");
             float turnSpeed = rb.velocity.x * turnFactor;
             movement.x -= turnSpeed;
         }
 
         if (-turnAroundCut > velocity.x && inputX > 0)
         {
-            Debug.Log("Right");
             float turnSpeed = rb.velocity.x * turnFactor;
-            movement.x += turnSpeed;
-        }*/
+            movement.x -= turnSpeed;
+        }
         #endregion
 
         movement *= Time.deltaTime;
         rb.AddForce(movement);
+
+        #endregion
+
+        #region check for flip
+
+        if (Camera.main.ScreenToWorldPoint(Input.mousePosition).x < transform.position.x && !facingRight)
+        {
+            flip();
+        }
+        else if (Camera.main.ScreenToWorldPoint(Input.mousePosition).x > transform.position.x && facingRight)
+        {
+            flip();
+        }
 
         #endregion
     }
@@ -76,23 +95,32 @@ public class PlayerMovement : MonoBehaviour
     private void OnCollisionStay2D(Collision2D other)
 	{
 
-        if (other.gameObject.layer == 8 && !grounded)
+        if (other.gameObject.layer == 8 || other.gameObject.layer == 9 && !grounded)
 		{
             grounded = true;
-            Debug.Log("Bing");
 		}
 
     }
 
     private void OnCollisionExit2D(Collision2D other)
 	{
-        if (other.gameObject.layer == 8 && grounded)
+        if (other.gameObject.layer == 8 || other.gameObject.layer == 9 && grounded)
         {
             grounded = false;
-            Debug.Log("Bong");
         }
 
     }
 
     private void ResetJump() { readyToJump = true; }
+
+    #endregion
+
+    void flip()
+    {
+        facingRight = !facingRight;
+
+        transform.Rotate(0f, 180f, 0f);
+        gun.transform.Rotate(0f, 180f, 0f);
+    }
+
 }
