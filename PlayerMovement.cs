@@ -2,31 +2,39 @@
 
 public class PlayerMovement : MonoBehaviour
 {
-    public float speed = 2000;
-    
-    bool grounded;
-    bool readyToJump = true;
-    public LayerMask whatIsGround;
-    public float jumpForce = 75000f;
-    public float jumpCooldown = 0.3f;
-    public float maximumSpeed = 10f;
-    public float turnAroundCut = 5f;
-    public float turnFactor = 2000f;
     public Rigidbody2D rb;
 
+    [Header("Movement")]
+    public float speed = 2000;
+    public float maximumSpeed = 10f;
+    public Vector3 velocity;
+    public float magnitude;
+    [Space(10)]
+    public float turnAroundCut = 5f;
+    public float turnFactor = 3000f;
+
+    [Header("Jumping")]
+    public float jumpForce = 75000f;
+    public float jumpCooldown = 0.3f;
+    public LayerMask whatIsGround;
+    bool grounded;
+    bool readyToJump = true;
+
+    [Header("Turning")]
     public bool facingRight;
     public GameObject gun;
 
-    Vector3 velocity;
-    float magnitude;
+    public bool cum;
+
 
     void FixedUpdate()
-	{
+    {
         movement();
     }
 
     #region movement
-    void movement() {
+    void movement()
+    {
 
         #region Add forces
 
@@ -34,9 +42,6 @@ public class PlayerMovement : MonoBehaviour
         float inputX = Input.GetAxis("Horizontal");
 
         Vector2 movement = new Vector2(speed * inputX, 0);
-
-        velocity = rb.velocity;
-        magnitude = Vector3.Magnitude(rb.velocity);
 
         if (grounded && readyToJump && jumping)
         {
@@ -46,29 +51,33 @@ public class PlayerMovement : MonoBehaviour
             movement.y = jumpForce;
         }
 
-        #region limit velocity
-        if (magnitude > maximumSpeed)
 
+
+        #region limit velocity
+        velocity = rb.velocity;
+        magnitude = System.Math.Abs(velocity.x);
+
+        if (magnitude > maximumSpeed)
         {
             float brakeSpeed = magnitude - maximumSpeed;
 
-            Vector3 normalisedVelocity = rb.velocity.normalized;
-            float brakeVelocity = normalisedVelocity.x * brakeSpeed;
+            Vector3 normalisedVelocity = velocity.normalized;
+            float BrakeForce = normalisedVelocity.x * brakeSpeed;
 
-            movement.x = brakeVelocity;
+            movement.x = BrakeForce;
         }
         #endregion
 
         #region turn around faster
         if (turnAroundCut < velocity.x && inputX < 0)
         {
-            float turnSpeed = rb.velocity.x * turnFactor;
+            float turnSpeed = velocity.x * turnFactor;
             movement.x -= turnSpeed;
         }
 
         if (-turnAroundCut > velocity.x && inputX > 0)
         {
-            float turnSpeed = rb.velocity.x * turnFactor;
+            float turnSpeed = velocity.x * turnFactor;
             movement.x -= turnSpeed;
         }
         #endregion
@@ -93,17 +102,17 @@ public class PlayerMovement : MonoBehaviour
     }
 
     private void OnCollisionStay2D(Collision2D other)
-	{
+    {
 
         if (other.gameObject.layer == 8 || other.gameObject.layer == 9 && !grounded)
-		{
+        {
             grounded = true;
-		}
+        }
 
     }
 
     private void OnCollisionExit2D(Collision2D other)
-	{
+    {
         if (other.gameObject.layer == 8 || other.gameObject.layer == 9 && grounded)
         {
             grounded = false;
