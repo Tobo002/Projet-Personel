@@ -31,12 +31,5 @@ public class RoomSpawner : MonoBehaviour
             Instantiate(templates.grid);
         }
     }
-
-    /*private void OnTriggerEnter2D(Collider2D collision)
-    {
-        if (collision.CompareTag("SpawnPoint") && collision.GetComponent<RoomSpawner>().spawned)
-        {
-            Destroy(gameObject);
-        }
-    }*/
+    
 }
