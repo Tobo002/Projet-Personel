@@ -3,8 +3,8 @@
 public class CameraFollow : MonoBehaviour
 {
     public Transform player;
-    public Vector3 offset;
-    public float speed = 0.1f;
+    public Vector3 offset =  new Vector3(0, 1, -10);
+    public float speed = 50f;
     public Vector3 velo = Vector3.zero;
 
     void FixedUpdate()

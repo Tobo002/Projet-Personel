@@ -9,6 +9,8 @@ public class MeleeCombat : MonoBehaviour
     public bool canAttack = true;
     public float attackCooldown = 0.5f;
     public LayerMask enemies;
+    public Animator animator;
+    private float force = 1500f;
 
     void Update()
     {
@@ -25,8 +27,20 @@ public class MeleeCombat : MonoBehaviour
         foreach(Collider2D enemy in hitEnemies)
         {
             Debug.Log("we hit " + enemy.name);
-            enemy.GetComponent<Enemy>().takeDamage(attackDamage);
+            Enemy script = enemy.GetComponent<Enemy>();
+
+            if (script)
+            {
+                script.takeDamage(attackDamage);
+                Rigidbody2D erb = enemy.GetComponent<Rigidbody2D>();
+                Vector2 dir = GetComponent<Rigidbody2D>().position - erb.position;
+                erb.AddForce(dir.normalized * -force);
+            }
+            else enemy.GetComponent<Crystal>().Smash();
+
         }
+
+        animator.SetTrigger("Sword");
 
         Invoke(nameof(ResetAttack), attackCooldown);
 

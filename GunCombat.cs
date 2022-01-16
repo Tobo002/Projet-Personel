@@ -8,13 +8,10 @@ public class GunCombat : MonoBehaviour
     public float shootSpeed = 0.1f;
     bool canShoot = true;
 
-    // Update is called once per frame
     void Update()
     {
         if (Input.GetButton("Fire1") && canShoot)
-        {
             Shoot();
-        }
     }
 
     void Shoot()

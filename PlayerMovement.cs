@@ -17,12 +17,17 @@ public class PlayerMovement : MonoBehaviour
     public float jumpForce = 75000f;
     public float jumpCooldown = 0.3f;
     public LayerMask whatIsGround;
-    bool grounded;
-    bool readyToJump = true;
+    public float walljumpForceSameWay = 50000f;
+    public float walljumpForceOtherWay = 10000f;
+    public bool grounded;
+    public bool walljumpL;
+    public bool walljumpR;
+    public bool readyToJump = true;
 
     [Header("Turning")]
     public bool facingRight;
     public GameObject gun;
+    public GameObject slash;
 
     public bool cum;
 
@@ -48,6 +53,16 @@ public class PlayerMovement : MonoBehaviour
             grounded = false;
             readyToJump = false;
             Invoke(nameof(ResetJump), jumpCooldown);
+            if (walljumpL)
+            {
+                movement.x = inputX < -0.1f ? -walljumpForceSameWay : -walljumpForceOtherWay;
+                walljumpL = false;
+            }
+            if (walljumpR)
+            {
+                movement.x = inputX > 0.1f ? walljumpForceSameWay : walljumpForceOtherWay;
+                walljumpR = false;
+            }
             movement.y = jumpForce;
         }
 
@@ -107,6 +122,10 @@ public class PlayerMovement : MonoBehaviour
         if (other.gameObject.layer == 8 || other.gameObject.layer == 9 && !grounded)
         {
             grounded = true;
+            Vector2 point = other.contacts[0].point;
+            Vector2 direction = other.GetContact(0).normal;
+            if (direction.x == 1) walljumpR = true;
+            if (direction.x == -1) walljumpL = true;
         }
 
     }
@@ -116,6 +135,8 @@ public class PlayerMovement : MonoBehaviour
         if (other.gameObject.layer == 8 || other.gameObject.layer == 9 && grounded)
         {
             grounded = false;
+            walljumpL = false;
+            walljumpR = false;
         }
 
     }
@@ -130,6 +151,7 @@ public class PlayerMovement : MonoBehaviour
 
         transform.Rotate(0f, 180f, 0f);
         gun.transform.Rotate(0f, 180f, 0f);
+        slash.transform.Rotate(180f, 0f, 0f);
     }
 
 }

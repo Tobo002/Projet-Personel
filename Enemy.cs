@@ -34,7 +34,6 @@ public class Enemy : MonoBehaviour
 
     void Die()
     {
-        Debug.Log("L ratio");
         Destroy(this.gameObject);
     }
 }
